@@ -1,4 +1,4 @@
-# Language Spec: Resource Description Format (RDF)
+# Language Spec: Resource Document Format (RDF)
 
 > **Layer:** Language — the canonical data representation.
 > **Status:** Spec v0.1. Build the first milestone below as a single PR.
