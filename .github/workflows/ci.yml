@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  language:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r language/validator/requirements.txt
+      - name: Validate examples
+        run: |
+          for f in language/examples/*.json; do
+            python language/validator/validate.py "$f" || exit 1
+          done
+      - name: Run tests
+        run: python -m pytest language/validator/tests/ -v
+
+  library:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r library/requirements.txt
+      - name: Run render tests
+        run: python -m pytest library/render/tests/ -v
+      - name: Run agent tests
+        run: python -m pytest library/agent/tests/ -v
+      - name: Run usage example
+        run: python library/examples/usage.py
+
+  protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r protocol/requirements.txt
+      - name: Start server
+        run: python protocol/server/main.py &
+      - name: Wait for server
+        run: sleep 2
+      - name: Run integration test
+        run: python -m pytest protocol/tests/ -v
