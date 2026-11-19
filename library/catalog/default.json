@@ -1,0 +1,57 @@
+{
+  "version": "0.1.0",
+  "name": "structured-web-default-catalog",
+  "description": "Trusted default component catalog for the v0.1 rendering runtime. Components are built-in modules named here. signature is null until signed catalogs exist.",
+  "signature": null,
+  "components": [
+    {
+      "name": "article-card",
+      "version": "1.0.0",
+      "types": ["article"],
+      "capabilities": ["text", "media", "links"],
+      "signature": null
+    },
+    {
+      "name": "product-card",
+      "version": "1.0.0",
+      "types": ["product"],
+      "capabilities": ["text", "media", "links"],
+      "signature": null
+    },
+    {
+      "name": "form-card",
+      "version": "1.0.0",
+      "types": ["form"],
+      "capabilities": ["text", "links"],
+      "signature": null
+    },
+    {
+      "name": "data-table",
+      "version": "1.0.0",
+      "types": ["dataset"],
+      "capabilities": ["text", "links"],
+      "signature": null
+    },
+    {
+      "name": "service-card",
+      "version": "1.0.0",
+      "types": ["service"],
+      "capabilities": ["text", "links"],
+      "signature": null
+    },
+    {
+      "name": "error-card",
+      "version": "1.0.0",
+      "types": ["error"],
+      "capabilities": ["text"],
+      "signature": null
+    },
+    {
+      "name": "generic",
+      "version": "1.0.0",
+      "types": ["*"],
+      "capabilities": ["text", "links"],
+      "signature": null
+    }
+  ]
+}

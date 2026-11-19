@@ -1,0 +1,4 @@
+# Python 3.12, the same interpreter .github/workflows/ci.yml installs.
+# These are the language validator's pins. The library imports that
+# validator; it does not keep a second copy of the schema checks.
+-r ../language/validator/requirements.txt
