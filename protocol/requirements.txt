@@ -1,0 +1,4 @@
+# Python 3.12, the same interpreter .github/workflows/ci.yml installs.
+# The protocol layer imports the language validator and the library
+# runtimes. It does not add a third-party package of its own.
+-r ../library/requirements.txt

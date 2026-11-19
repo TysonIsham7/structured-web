@@ -73,12 +73,14 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: pip install -r protocol/requirements.txt
-      - name: Start server
-        run: python protocol/server/main.py &
-      - name: Wait for server
-        run: sleep 2
-      - name: Run integration test
-        run: python -m pytest protocol/tests/ -v
+      - name: Run server and integration tests
+        run: |
+          python protocol/server/main.py &
+          pid=$!
+          cleanup() { kill "$pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          python -c "from protocol.server.app import wait_until_ready; wait_until_ready()"
+          python -m pytest protocol/tests/ -v
 
   gitleaks:
     runs-on: ubuntu-latest
