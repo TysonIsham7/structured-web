@@ -50,7 +50,7 @@ Components are registered as catalog entries:
 
 `signature` is null in v0.1 (unsigned catalog) but the field exists for signed catalogs later.
 
-Ship a minimal default catalog with at least: one component per core vocabulary type, plus a generic fallback.
+Ship a minimal default catalog with at least one component for each of the six core vocabulary types (`article`, `product`, `form`, `dataset`, `service`, and `error`), plus a generic fallback.
 
 ## Agent Runtime
 
@@ -68,7 +68,7 @@ An `AgentSession` exposes:
 
 ### Precondition Evaluation
 
-Preconditions are strings from the standard predicate vocabulary (defined in `language/vocabularies/`). The agent runtime evaluates them against a **state snapshot** supplied by the host application — it does not fetch or infer state itself. If a precondition cannot be evaluated, invocation fails with a typed `precondition_unknown` error rather than silently proceeding.
+Preconditions are strings from the standard predicate vocabulary (defined in `vocabularies/core.json`). The agent runtime evaluates them against a **state snapshot** supplied by the host application — it does not fetch or infer state itself. If a precondition cannot be evaluated, invocation fails with a typed `precondition_unknown` error rather than silently proceeding.
 
 ### Risk Gating
 
@@ -85,7 +85,7 @@ The consent callback is a host-provided function: `(action, args, context) -> Pr
 
 1. **Rendering runtime** in one language (TypeScript or Python — pick one, justify in the PR) that: loads and validates a resource document using the language schema, resolves components from a default catalog, and renders at least the three example documents from `language/examples/` to HTML. At `library/render/`.
 2. **Agent runtime** in the same language that: creates a session from a document, exposes `discover()` and `invoke()`, enforces input schema validation and risk gating (with a mock consent callback in tests). At `library/agent/`.
-3. **A default component catalog** (JSON) with entries for all five core vocabulary types plus a generic fallback. At `library/catalog/default.json`.
+3. **A default component catalog** (JSON) with entries for all six core vocabulary types, including `error`, plus a generic fallback. At `library/catalog/default.json`.
 4. **Tests** covering: render of all three examples produces non-empty HTML; unregistered preferred component falls back gracefully; agent invoke with valid args succeeds; agent invoke with invalid args fails with a typed error; high-risk action blocks without consent; high-risk action proceeds with consent granted.
 5. **A short usage example** (script or notebook) showing end-to-end: load document → render for screen → create agent session → discover → invoke one action.
 

@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "name": "structured-web-core",
-  "description": "Base vocabulary for the Structured Web resource description language. Defines the five core resource types and their content schemas, plus the standard predicate vocabulary used in action preconditions and effects.",
+  "description": "Base vocabulary for the Structured Web resource description language. Defines the six core resource types and their content schemas, plus the standard predicate vocabulary used in action preconditions and effects.",
   "types": {
     "article": {
       "description": "A piece of written content — blog post, news, essay, documentation page.",
