@@ -1,0 +1,206 @@
+{
+  "version": "0.1.0",
+  "name": "structured-web-core",
+  "description": "Base vocabulary for the Structured Web resource description language. Defines the five core resource types and their content schemas, plus the standard predicate vocabulary used in action preconditions and effects.",
+  "types": {
+    "article": {
+      "description": "A piece of written content — blog post, news, essay, documentation page.",
+      "content_schema": {
+        "type": "object",
+        "required": ["body"],
+        "properties": {
+          "body": {
+            "type": "string",
+            "description": "The main text content. Plain text or a restricted markup subset (decided by the rendering library, not the language layer)."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Optional short summary for listings and agent overviews."
+          },
+          "author": {
+            "type": "string"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "product": {
+      "description": "A sellable or referenceable item — physical good, digital good, or service offering.",
+      "content_schema": {
+        "type": "object",
+        "required": ["name", "price"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "price": {
+            "type": "object",
+            "required": ["amount", "currency"],
+            "properties": {
+              "amount": { "type": "number" },
+              "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+            }
+          },
+          "sku": { "type": "string" },
+          "in_stock": { "type": "boolean" },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["src", "alt"],
+              "properties": {
+                "src": { "type": "string", "format": "uri" },
+                "alt": { "type": "string" }
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "form": {
+      "description": "A structured input surface the user or agent fills out.",
+      "content_schema": {
+        "type": "object",
+        "required": ["fields"],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type"],
+              "properties": {
+                "name": { "type": "string" },
+                "type": {
+                  "type": "string",
+                  "enum": ["text", "number", "boolean", "select", "textarea", "date", "email", "url", "file"]
+                },
+                "label": { "type": "string" },
+                "required": { "type": "boolean" },
+                "options": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "For select fields."
+                },
+                "default": true
+              }
+            }
+          },
+          "submit_action": {
+            "type": "string",
+            "description": "Name of the action in the resource's actions array that submits this form."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "dataset": {
+      "description": "Structured tabular or record data.",
+      "content_schema": {
+        "type": "object",
+        "required": ["columns", "rows"],
+        "properties": {
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type"],
+              "properties": {
+                "name": { "type": "string" },
+                "type": {
+                  "type": "string",
+                  "enum": ["string", "number", "boolean", "date", "datetime", "uri", "json"]
+                }
+              }
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "array"
+            }
+          },
+          "total_count": {
+            "type": "integer",
+            "description": "Total rows available if paginated."
+          },
+          "next_page": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "service": {
+      "description": "A callable capability exposed as a resource — an API, a tool, or a background job.",
+      "content_schema": {
+        "type": "object",
+        "required": ["endpoint"],
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+            "default": "GET"
+          },
+          "health_check": {
+            "type": "string",
+            "format": "uri"
+          },
+          "rate_limit": {
+            "type": "object",
+            "properties": {
+              "requests_per_minute": { "type": "integer" }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "error": {
+      "description": "A structured error resource returned when something goes wrong.",
+      "content_schema": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "details": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "predicates": {
+    "description": "Standard predicate strings used in action preconditions and effects. Predicates are evaluated by the agent runtime against a host-supplied state snapshot. Unknown predicates produce a typed precondition_unknown error, never silent passage.",
+    "examples": [
+      "user.is_authenticated",
+      "user.has_role:admin",
+      "cart.non_empty",
+      "resource.is_published",
+      "inventory.available",
+      "session.not_expired"
+    ],
+    "syntax": "Predicates follow dotted noun.verb form. Optional colon-suffixed parameter. The noun refers to a state domain the host application exposes; the verb is a boolean check. This vocabulary defines the syntax and a starter set; hosts may register domain-specific predicates alongside these.",
+    "starter_set": [
+      "user.is_authenticated",
+      "user.has_role:{role}",
+      "cart.non_empty",
+      "resource.is_published",
+      "inventory.available",
+      "session.not_expired",
+      "quota.remaining"
+    ]
+  }
+}
