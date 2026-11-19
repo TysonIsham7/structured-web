@@ -1,0 +1,82 @@
+{
+  "version": "0.1.0",
+  "id": "urn:example:resource:product:widget-100",
+  "type": "product",
+  "title": "Example Widget",
+  "content": {
+    "name": "Example Widget",
+    "description": "A reference product used to illustrate a high-risk purchase action.",
+    "price": {
+      "amount": 24,
+      "currency": "USD"
+    },
+    "sku": "WIDGET-100",
+    "in_stock": true,
+    "images": [
+      {
+        "src": "https://example.com/media/widget-100.png",
+        "alt": "Example widget on a plain background"
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "purchase",
+      "description": "Complete a purchase for this product.",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["quantity"],
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["order_id", "status"],
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "preconditions": ["user.is_authenticated", "cart.non_empty"],
+      "effects": ["order.created", "inventory.decremented"],
+      "risk": "high",
+      "idempotent": false
+    }
+  ],
+  "links": [
+    {
+      "rel": "related",
+      "href": "https://example.com/articles/getting-started",
+      "title": "Getting started with structured resources"
+    }
+  ],
+  "provenance": {
+    "source": "https://example.com/products/widget-100",
+    "fetched_at": "2026-11-19T00:00:00Z",
+    "content_hash": "sha256:242a6fa010b92a5541497ef4d0fda90606150ac7aac2e9f4e5a9b3c3ef101e23",
+    "signed_by": null
+  },
+  "render": {
+    "preferred_component": "product-card",
+    "layout_priority": 1,
+    "media": [
+      {
+        "type": "image",
+        "src": "https://example.com/media/widget-100.png",
+        "alt": "Example widget on a plain background"
+      }
+    ]
+  }
+}
