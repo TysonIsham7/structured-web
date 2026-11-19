@@ -1,0 +1,89 @@
+{
+  "version": "0.1.0",
+  "id": "urn:example:resource:form:contact",
+  "type": "form",
+  "title": "Example contact form",
+  "content": {
+    "fields": [
+      {
+        "name": "email",
+        "type": "email",
+        "label": "Email",
+        "required": true
+      },
+      {
+        "name": "topic",
+        "type": "select",
+        "label": "Topic",
+        "required": true,
+        "options": ["general", "support", "feedback"]
+      },
+      {
+        "name": "message",
+        "type": "textarea",
+        "label": "Message",
+        "required": true
+      }
+    ],
+    "submit_action": "submit"
+  },
+  "actions": [
+    {
+      "name": "submit",
+      "description": "Submit the contact form.",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["email", "topic", "message"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "topic": {
+            "type": "string",
+            "enum": ["general", "support", "feedback"]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["received"],
+        "properties": {
+          "received": {
+            "type": "boolean"
+          },
+          "reference": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "effects": ["form.submitted"],
+      "risk": "medium",
+      "idempotent": false
+    }
+  ],
+  "links": [
+    {
+      "rel": "about",
+      "href": "https://example.com/privacy",
+      "title": "Example privacy note"
+    }
+  ],
+  "provenance": {
+    "source": "https://example.com/forms/contact",
+    "fetched_at": "2026-11-19T00:00:00Z",
+    "content_hash": "sha256:a410cf9c4ca8a482cfcab5532d0d372fcdb2cedd6fbbb7c4c160c037ec009bb4",
+    "signed_by": null
+  },
+  "render": {
+    "preferred_component": "form-card",
+    "layout_priority": 2
+  }
+}

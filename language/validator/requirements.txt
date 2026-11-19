@@ -1,0 +1,9 @@
+# Python 3.12, the same version .github/workflows/ci.yml installs.
+# rfc3986-validator and rfc3339-validator make JSON Schema format
+# (uri, uri-reference, date-time) assert, which draft 2020-12 does not
+# do on its own. Both are MIT. This list does not use the jsonschema
+# "format" extra, which depends on GPL rfc3987.
+jsonschema==4.26.0
+rfc3986-validator==0.1.1
+rfc3339-validator==0.1.4
+pytest==9.2.0

@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/structured-web/resource/v0.1.json",
+  "title": "Structured Web resource document",
+  "description": "Canonical resource description, format v0.1. Properties not listed here are allowed so a newer writer can add fields and a v0.1 reader can ignore them.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "version",
+    "id",
+    "type",
+    "title",
+    "content",
+    "actions",
+    "links",
+    "provenance"
+  ],
+  "properties": {
+    "version": {
+      "description": "Format version. Agents select a parser from this semver string.",
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "id": {
+      "description": "Durable, globally unique identifier for this resource.",
+      "type": "string",
+      "format": "uri"
+    },
+    "type": {
+      "description": "Resource type name from a registered vocabulary. Membership is checked against vocabularies/core.json by the validator, not by an enum in this schema, so a later vocabulary does not require a new format draft.",
+      "type": "string"
+    },
+    "title": {
+      "description": "Human-readable title. Agents may use it as a display label.",
+      "type": "string"
+    },
+    "content": {
+      "description": "Typed payload. The object shape comes from the vocabulary content schema for type.",
+      "type": "object"
+    },
+    "actions": {
+      "description": "Declared actions. May be empty.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "links": {
+      "description": "Related resources.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/link"
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "render": {
+      "$ref": "#/$defs/render"
+    }
+  },
+  "$defs": {
+    "action": {
+      "description": "One declared action. name is unique within the resource; the validator enforces that, since JSON Schema has no standard unique-property keyword.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "name",
+        "description",
+        "input_schema",
+        "output_schema",
+        "risk",
+        "idempotent"
+      ],
+      "properties": {
+        "name": {
+          "description": "Invocation name, unique within the resource.",
+          "type": "string"
+        },
+        "description": {
+          "description": "What the action does, in plain language.",
+          "type": "string"
+        },
+        "input_schema": {
+          "description": "JSON Schema object for the arguments the caller must supply. The validator checks that this object is itself a valid draft 2020-12 schema.",
+          "type": "object"
+        },
+        "output_schema": {
+          "description": "JSON Schema object for a successful result. The validator checks that this object is itself a valid draft 2020-12 schema.",
+          "type": "object"
+        },
+        "preconditions": {
+          "description": "Predicate strings that must hold before invocation. Evaluation is not done in this layer.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "effects": {
+          "description": "Predicate strings describing state changes. Evaluation is not done in this layer.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risk": {
+          "description": "Impact classification. High and critical actions require consent or pre-authorization in the agent runtime.",
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "idempotent": {
+          "description": "Whether repeated identical calls are safe.",
+          "type": "boolean"
+        }
+      }
+    },
+    "link": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["rel", "href"],
+      "properties": {
+        "rel": {
+          "type": "string"
+        },
+        "href": {
+          "description": "Absolute URI or relative reference.",
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "description": "Where this data came from. signed_by may be null in v0.1. This layer does not verify the digest or a signature.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["source", "fetched_at", "content_hash"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "format": "uri"
+        },
+        "fetched_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "content_hash": {
+          "description": "Content digest. Examples use sha256:<64 hex>. Equality with the body is not checked.",
+          "type": "string"
+        },
+        "signed_by": {
+          "description": "Signer identity, or null when the document is unsigned.",
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "render": {
+      "description": "Optional rendering hints. A client may ignore them.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "preferred_component": {
+          "type": "string"
+        },
+        "layout_priority": {
+          "type": "integer"
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/media"
+          }
+        }
+      }
+    },
+    "media": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["type", "src"],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "src": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "alt": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

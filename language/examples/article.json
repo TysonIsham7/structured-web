@@ -1,0 +1,68 @@
+{
+  "version": "0.1.0",
+  "id": "urn:example:resource:article:getting-started",
+  "type": "article",
+  "title": "Getting started with structured resources",
+  "content": {
+    "body": "A resource document is the canonical representation of a page. It carries typed content, a catalog of declared actions, links, and provenance. Human-visible interfaces are projected from that document rather than the other way around.",
+    "summary": "What a v0.1 resource document contains and why it is the canonical form.",
+    "author": "example-publisher",
+    "published_at": "2026-11-19T00:00:00Z",
+    "tags": ["language", "overview"]
+  },
+  "actions": [
+    {
+      "name": "bookmark",
+      "description": "Save this article to the reader's reading list.",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["saved"],
+        "properties": {
+          "saved": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "preconditions": ["user.is_authenticated"],
+      "effects": ["resource.bookmarked"],
+      "risk": "low",
+      "idempotent": true
+    }
+  ],
+  "links": [
+    {
+      "rel": "related",
+      "href": "https://example.com/docs/language",
+      "title": "Language overview"
+    }
+  ],
+  "provenance": {
+    "source": "https://example.com/articles/getting-started",
+    "fetched_at": "2026-11-19T00:00:00Z",
+    "content_hash": "sha256:3acadfc369ce57ff414e70e52ebc742248f8e31c98e5939e6670bd2a34ac7ff3",
+    "signed_by": null
+  },
+  "render": {
+    "preferred_component": "article-card",
+    "layout_priority": 1,
+    "media": [
+      {
+        "type": "image",
+        "src": "https://example.com/media/getting-started.png",
+        "alt": "Diagram of a resource document projected to a human view"
+      }
+    ]
+  }
+}
