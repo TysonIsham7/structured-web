@@ -2,8 +2,6 @@
 
 Synthetic fixture for a fictional two-bedroom vacation rental in St. George, Utah. The names, rate, dates, photos, and house rules are invented. Photo URLs point at `example.com`. Nothing here is a real listing, host, address, phone, email, or business.
 
-The document is Resource Document Format v0.1. Its type is `product`, because that is the core type with a name and a price. Bedrooms, bathrooms, amenities, availability, and house rules are extra content fields the vocabulary already allows. The nightly rate is `content.price` with `content.price_period` set to `night`.
-
 `listing.invalid.json` is the same document with `actions[0].risk` set to `urgent`, which is not in the risk enum.
 
 ## What the integration test proves
