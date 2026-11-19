@@ -79,7 +79,7 @@ Protocol errors return JSON with a stable shape:
   "error": {
     "code": "schema_invalid",
     "message": "Resource document failed validation.",
-    "details": { "path": "/actions/0/risk", "expected": "enum" }
+    "details": { "path": "$.actions[0].risk", "expected": "enum" }
   }
 }
 ```

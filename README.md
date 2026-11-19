@@ -132,7 +132,7 @@ Start with `/language` — the format is the foundation. The library and protoco
 
 ## Status
 
-- [ ] Language spec → first implementation PR
+- [x] Language spec → first implementation PR
 - [ ] Library spec → first implementation PR
 - [ ] Protocol spec → first implementation PR
 - [ ] Cross-layer integration test (resource → render → agent invoke → structured result)
@@ -140,4 +140,4 @@ Start with `/language` — the format is the foundation. The library and protoco
 
 ## License
 
-TBD — likely MIT or Apache-2.0 once the first implementations land. Contributions welcome in the form of spec feedback and implementation PRs.
+MIT. See `LICENSE`. Contributions welcome in the form of spec feedback and implementation PRs.

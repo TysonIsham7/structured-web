@@ -1,0 +1,29 @@
+{
+  "id": "https://example.com/errors/not-found",
+  "type": "error",
+  "version": "0.1.0",
+  "title": "Resource Not Found",
+  "content": {
+    "code": "not_found",
+    "message": "The requested resource does not exist.",
+    "details": {
+      "requested_uri": "https://example.com/missing-page",
+      "suggestion": "Check the URL or browse the site manifest at /.well-known/structured-web."
+    }
+  },
+  "actions": [],
+  "links": [
+    {
+      "rel": "home",
+      "href": "https://example.com/"
+    }
+  ],
+  "provenance": {
+    "source": "https://example.com/errors/not-found",
+    "fetched_at": "2026-11-18T12:00:00Z",
+    "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "render": {
+    "preferred_component": "error-card"
+  }
+}

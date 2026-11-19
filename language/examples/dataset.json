@@ -1,0 +1,53 @@
+{
+  "id": "https://example.com/data/products",
+  "type": "dataset",
+  "version": "0.1.0",
+  "title": "Product Catalog",
+  "content": {
+    "columns": [
+      { "name": "sku", "type": "string" },
+      { "name": "name", "type": "string" },
+      { "name": "price", "type": "number" },
+      { "name": "in_stock", "type": "boolean" }
+    ],
+    "rows": [
+      ["SKU-001", "Wireless Mouse", 29.99, true],
+      ["SKU-002", "USB-C Hub", 49.99, true],
+      ["SKU-003", "Laptop Stand", 89.99, false]
+    ],
+    "total_count": 3
+  },
+  "actions": [
+    {
+      "name": "export_csv",
+      "description": "Export the dataset as CSV.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": { "type": "integer", "minimum": 1 }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["csv", "row_count"],
+        "properties": {
+          "csv": { "type": "string" },
+          "row_count": { "type": "integer" }
+        }
+      },
+      "preconditions": [],
+      "effects": ["dataset.exported"],
+      "risk": "low",
+      "idempotent": true
+    }
+  ],
+  "links": [],
+  "provenance": {
+    "source": "https://example.com/data/products",
+    "fetched_at": "2026-11-18T12:00:00Z",
+    "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "render": {
+    "preferred_component": "data-table"
+  }
+}

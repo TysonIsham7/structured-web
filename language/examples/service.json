@@ -1,0 +1,50 @@
+{
+  "id": "https://example.com/api/weather",
+  "type": "service",
+  "version": "0.1.0",
+  "title": "Weather Service",
+  "content": {
+    "endpoint": "https://example.com/api/weather",
+    "method": "GET",
+    "health_check": "https://example.com/api/weather/health",
+    "rate_limit": {
+      "requests_per_minute": 60
+    }
+  },
+  "actions": [
+    {
+      "name": "get_current",
+      "description": "Get current weather for a location.",
+      "input_schema": {
+        "type": "object",
+        "required": ["location"],
+        "properties": {
+          "location": { "type": "string" },
+          "units": { "type": "string", "enum": ["metric", "imperial"] }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["temperature", "condition", "humidity"],
+        "properties": {
+          "temperature": { "type": "number" },
+          "condition": { "type": "string" },
+          "humidity": { "type": "number" }
+        }
+      },
+      "preconditions": [],
+      "effects": ["weather.fetched"],
+      "risk": "low",
+      "idempotent": true
+    }
+  ],
+  "links": [],
+  "provenance": {
+    "source": "https://example.com/api/weather",
+    "fetched_at": "2026-11-18T12:00:00Z",
+    "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "render": {
+    "preferred_component": "service-card"
+  }
+}
