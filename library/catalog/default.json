@@ -26,7 +26,7 @@
       "signature": null
     },
     {
-      "name": "dataset-table",
+      "name": "data-table",
       "version": "1.0.0",
       "types": ["dataset"],
       "capabilities": ["text", "links"],

@@ -320,7 +320,7 @@ BUILTIN_RENDERERS: dict[str, Renderer] = {
     "article-card": render_article,
     "product-card": render_product,
     "form-card": render_form,
-    "dataset-table": render_dataset,
+    "data-table": render_dataset,
     "service-card": render_service,
     "error-card": render_error,
     "generic": render_generic,

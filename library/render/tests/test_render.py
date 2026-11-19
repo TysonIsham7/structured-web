@@ -63,7 +63,7 @@ def test_default_catalog_covers_six_types_and_generic() -> None:
         "article-card",
         "product-card",
         "form-card",
-        "dataset-table",
+        "data-table",
         "service-card",
         "error-card",
         "generic",
@@ -79,13 +79,24 @@ def test_default_catalog_covers_six_types_and_generic() -> None:
     }
 
 
+EXAMPLE_RENDERINGS = [
+    ("article.json", "canonical representation", "article-card"),
+    ("product.json", "WIDGET-100", "product-card"),
+    ("form.json", "Email", "form-card"),
+    ("dataset.json", "Wireless Mouse", "data-table"),
+    ("service.json", "https://example.com/api/weather", "service-card"),
+    ("error.json", "not_found", "error-card"),
+]
+
+
+def test_render_cases_cover_every_example() -> None:
+    names = sorted(path.name for path in EXAMPLES.glob("*.json"))
+    assert names == sorted(item[0] for item in EXAMPLE_RENDERINGS)
+
+
 @pytest.mark.parametrize(
     ("name", "snippet", "component"),
-    [
-        ("article.json", "canonical representation", "article-card"),
-        ("product.json", "WIDGET-100", "product-card"),
-        ("form.json", "Email", "form-card"),
-    ],
+    EXAMPLE_RENDERINGS,
 )
 def test_examples_render_non_empty_html(name: str, snippet: str, component: str) -> None:
     document = load_example(name)
@@ -237,7 +248,7 @@ def test_theme_hooks_are_sanitized() -> None:
 def test_remaining_core_types_render() -> None:
     documents = [
         (
-            "dataset-table",
+            "data-table",
             resource(
                 "dataset",
                 {

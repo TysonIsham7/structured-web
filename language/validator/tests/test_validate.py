@@ -53,7 +53,17 @@ def assert_invalid(
 
 def test_examples_are_valid(tmp_path: Path) -> None:
     names = sorted(path.name for path in EXAMPLES.glob("*.json"))
-    assert names == ["article.json", "form.json", "product.json"]
+    # The language milestone shipped three examples. Main later added
+    # dataset, service, and error documents; this list has to match the
+    # directory or the language CI job fails before it validates them.
+    assert names == [
+        "article.json",
+        "dataset.json",
+        "error.json",
+        "form.json",
+        "product.json",
+        "service.json",
+    ]
     # Run from a directory that is not the repo root. Schema and vocabulary
     # paths are resolved from the validator file, not from the cwd.
     for name in names:
