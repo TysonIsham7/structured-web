@@ -21,12 +21,20 @@ def load_example(name: str) -> dict:
     return json.loads((EXAMPLES / name).read_text(encoding="utf-8"))
 
 
-def purchase_output(action, args, context):
-    return {"order_id": "ord-100", "status": "created"}
+ACTION = "update_resource"
+VALID_ARGS = {"note": "apply update"}
+INVALID_ARGS = {"note": ""}
+
+
+def action_output(action, args, context):
+    return {"result_id": "result-100", "status": "updated"}
 
 
 def ready_state() -> dict:
-    return {"user": {"is_authenticated": True}, "cart": {"non_empty": True}}
+    return {
+        "user": {"is_authenticated": True},
+        "resource": {"is_published": True},
+    }
 
 
 def allow(action, args, context) -> bool:
@@ -38,17 +46,17 @@ def refuse_if_called(*_args):
 
 
 def test_discover_returns_declared_actions() -> None:
-    session = create_session(load_example("product.json"))
+    session = create_session(load_example("update.json"))
     catalog = session.discover()
-    assert catalog[0]["name"] == "purchase"
+    assert catalog[0]["name"] == ACTION
     assert catalog[0]["risk"] == "high"
-    assert catalog[0]["input_schema"]["required"] == ["quantity"]
+    assert catalog[0]["input_schema"]["required"] == ["note"]
     assert catalog[0]["preconditions"] == [
         "user.is_authenticated",
-        "cart.non_empty",
+        "resource.is_published",
     ]
     catalog[0]["name"] = "mutated"
-    assert session.discover()[0]["name"] == "purchase"
+    assert session.discover()[0]["name"] == ACTION
 
 
 def test_discover_keeps_unknown_action_fields() -> None:
@@ -78,19 +86,19 @@ def test_invoke_with_valid_args_succeeds() -> None:
 
     def perform(action, args, context):
         seen["name"] = action["name"]
-        seen["quantity"] = args["quantity"]
+        seen["note"] = args["note"]
         seen["risk"] = context["risk"]
-        return {"order_id": "ord-100", "status": "created"}
+        return {"result_id": "result-100", "status": "updated"}
 
     session = create_session(
-        load_example("product.json"),
+        load_example("update.json"),
         SessionOptions(state=ready_state(), consent=allow, perform=perform),
     )
-    result = session.invoke("purchase", {"quantity": 1})
+    result = session.invoke(ACTION, VALID_ARGS)
     assert result.ok is True
     assert result.code == "ok"
-    assert result.output == {"order_id": "ord-100", "status": "created"}
-    assert seen == {"name": "purchase", "quantity": 1, "risk": "high"}
+    assert result.output == {"result_id": "result-100", "status": "updated"}
+    assert seen == {"name": ACTION, "note": "apply update", "risk": "high"}
 
 
 def test_invoke_with_invalid_args_is_a_typed_error() -> None:
@@ -102,27 +110,27 @@ def test_invoke_with_invalid_args_is_a_typed_error() -> None:
         return True
 
     session = create_session(
-        load_example("product.json"),
+        load_example("update.json"),
         SessionOptions(
             state=ready_state(),
             consent=consent,
             perform=refuse_if_called,
         ),
     )
-    result = session.invoke("purchase", {"quantity": 0})
+    result = session.invoke(ACTION, INVALID_ARGS)
     assert result.ok is False
     assert result.code == "invalid_input"
-    assert any("quantity" in line for line in result.details)
+    assert any("note" in line for line in result.details)
     assert consent_called is False
     assert session.audit[-1].outcome == "invalid_input"
 
 
 def test_high_risk_blocks_without_consent() -> None:
     session = create_session(
-        load_example("product.json"),
+        load_example("update.json"),
         SessionOptions(state=ready_state(), perform=refuse_if_called),
     )
-    result = session.invoke("purchase", {"quantity": 1})
+    result = session.invoke(ACTION, VALID_ARGS)
     assert result.ok is False
     assert result.code == "consent_required"
     assert session.audit[-1].risk == "high"
@@ -131,30 +139,30 @@ def test_high_risk_blocks_without_consent() -> None:
 
 def test_high_risk_blocks_when_consent_is_denied() -> None:
     session = create_session(
-        load_example("product.json"),
+        load_example("update.json"),
         SessionOptions(
             state=ready_state(),
             consent=lambda action, args, context: False,
             perform=refuse_if_called,
         ),
     )
-    result = session.invoke("purchase", {"quantity": 1})
+    result = session.invoke(ACTION, VALID_ARGS)
     assert result.code == "consent_denied"
 
 
 def test_high_risk_proceeds_with_consent() -> None:
     session = create_session(
-        load_example("product.json"),
+        load_example("update.json"),
         SessionOptions(
             state=ready_state(),
             consent=allow,
-            perform=purchase_output,
+            perform=action_output,
         ),
     )
-    result = session.invoke("purchase", {"quantity": 2})
+    result = session.invoke(ACTION, {"note": "second update"})
     assert result.ok is True
     assert result.code == "ok"
-    assert result.output["status"] == "created"
+    assert result.output["status"] == "updated"
 
 
 def test_precondition_unknown_when_snapshot_cannot_answer() -> None:
@@ -166,14 +174,14 @@ def test_precondition_unknown_when_snapshot_cannot_answer() -> None:
         return True
 
     session = create_session(
-        load_example("product.json"),
+        load_example("update.json"),
         SessionOptions(
             state={},
             consent=consent,
             perform=refuse_if_called,
         ),
     )
-    result = session.invoke("purchase", {"quantity": 1})
+    result = session.invoke(ACTION, VALID_ARGS)
     assert result.code == "precondition_unknown"
     assert result.details == ("user.is_authenticated",)
     assert "user.is_authenticated" in result.message
@@ -181,23 +189,23 @@ def test_precondition_unknown_when_snapshot_cannot_answer() -> None:
 
 
 def test_precondition_failed_when_boolean_is_false() -> None:
-    state = {"user": {"is_authenticated": False}, "cart": {"non_empty": True}}
+    state = {"user": {"is_authenticated": False}, "resource": {"is_published": True}}
     session = create_session(
-        load_example("product.json"),
+        load_example("update.json"),
         SessionOptions(state=state, consent=allow, perform=refuse_if_called),
     )
-    result = session.invoke("purchase", {"quantity": 1})
+    result = session.invoke(ACTION, VALID_ARGS)
     assert result.code == "precondition_failed"
     assert result.details == ("user.is_authenticated",)
 
 
 def test_non_boolean_snapshot_value_is_unknown() -> None:
-    state = {"user": {"is_authenticated": "yes"}, "cart": {"non_empty": True}}
+    state = {"user": {"is_authenticated": "yes"}, "resource": {"is_published": True}}
     session = create_session(
-        load_example("product.json"),
+        load_example("update.json"),
         SessionOptions(state=state, consent=allow, perform=refuse_if_called),
     )
-    result = session.invoke("purchase", {"quantity": 1})
+    result = session.invoke(ACTION, VALID_ARGS)
     assert result.code == "precondition_unknown"
 
 
@@ -263,7 +271,7 @@ def test_invalid_email_fails_input_schema() -> None:
 
 
 def test_critical_requires_policy_before_consent() -> None:
-    document = copy.deepcopy(load_example("product.json"))
+    document = copy.deepcopy(load_example("update.json"))
     document["actions"][0]["risk"] = "critical"
     consent_called = False
 
@@ -280,7 +288,7 @@ def test_critical_requires_policy_before_consent() -> None:
             perform=refuse_if_called,
         ),
     )
-    blocked = session.invoke("purchase", {"quantity": 1})
+    blocked = session.invoke(ACTION, VALID_ARGS)
     assert blocked.code == "policy_required"
     assert consent_called is False
 
@@ -288,23 +296,23 @@ def test_critical_requires_policy_before_consent() -> None:
         document,
         SessionOptions(
             state=ready_state(),
-            preauthorized={"purchase"},
+            preauthorized={ACTION},
             perform=refuse_if_called,
         ),
     )
-    needs_consent = authorized.invoke("purchase", {"quantity": 1})
+    needs_consent = authorized.invoke(ACTION, VALID_ARGS)
     assert needs_consent.code == "consent_required"
 
     allowed = create_session(
         document,
         SessionOptions(
             state=ready_state(),
-            preauthorized={"purchase"},
+            preauthorized={ACTION},
             consent=allow,
-            perform=purchase_output,
+            perform=action_output,
         ),
     )
-    result = allowed.invoke("purchase", {"quantity": 1})
+    result = allowed.invoke(ACTION, VALID_ARGS)
     assert result.ok is True
     assert result.code == "ok"
 

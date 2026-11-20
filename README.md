@@ -72,7 +72,7 @@ You would not throw away HTTP or browsers. You would:
 - Standardize an action catalog format and a discovery mechanism (a well-known path or link relation).
 - Evolve browser developer tools and agent runtimes to consume the structured form preferentially.
 - Treat existing HTML sites as legacy views that can be gradually annotated or wrapped with structured descriptions.
-- Encourage platforms and major sites to expose action catalogs first for the most valuable interactions (search, booking, purchase, form fill, data export).
+- Encourage platforms and major sites to expose action catalogs first for the most valuable interactions (search, retrieval, update, form fill, data export).
 
 The structured form only becomes canonical when the tooling and incentives make it cheaper than raw markup. That is the adoption problem, and it is the single biggest thing that decides whether this happens. The realistic path is a decade of legacy HTML wrapped with structured annotations, not a clean break.
 
@@ -119,7 +119,9 @@ The discovery and interaction rules. How an agent finds a resource's action cata
 
 A language without a protocol is just a file format nobody agrees on. A protocol without a language has nothing to carry. A library without either is just another framework that dies when the hype moves on. The web only ever changed when all three arrived together — HTML, HTTP, and browsers showed up as one package, not as separate ideas.
 
-## Getting Started for Agent Builders
+## Contributing to the reference implementation
+
+You do not need to touch this repo to adopt Structured Web on your own site: just implement the spec and serve the media type.
 
 Each folder contains a `SPEC.md` written as build instructions for a coding agent (Cursor Cloud, Claude Code, or equivalent). The intended workflow:
 

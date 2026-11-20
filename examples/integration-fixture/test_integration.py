@@ -1,4 +1,4 @@
-"""End-to-end proof for the synthetic St. George condo fixture.
+"""End-to-end proof for the domain-neutral integration fixture.
 
 The reference server, client, language validator, and library runtimes
 are used as they are. This module does not reimplement them.
@@ -37,10 +37,13 @@ from protocol.server.app import (  # noqa: E402
 from protocol.server.resources import Resource, validation_errors  # noqa: E402
 
 FIXTURE = Path(__file__).resolve().parent
-LISTING_PATH = "/listings/cottonwood-bench-condo"
-BROKEN_PATH = "/listings/cottonwood-bench-condo-invalid"
-ACTION = "request_to_book"
-STAY = {"check_in": "2027-03-04", "check_out": "2027-03-08", "guests": 2}
+RESOURCE_PATH = "/resources/example-resource"
+BROKEN_PATH = "/resources/example-resource-invalid"
+ACTION = "update_resource"
+NOTE = {"note": "fixture note"}
+FETCHED_AT = "2026-11-19T00:00:00Z"
+PRECONDITIONS = ["user.is_authenticated", "resource.is_published"]
+EFFECTS = ["resource.updated"]
 
 
 def _load(name: str) -> tuple[dict, bytes]:
@@ -70,14 +73,14 @@ def _get(url: str, accept: str) -> tuple[int, dict[str, str], bytes]:
         connection.close()
 
 
-def test_cottonwood_bench_condo_end_to_end() -> None:
-    listing, listing_body = _load("listing.json")
-    broken, broken_body = _load("listing.invalid.json")
+def test_integration_fixture_end_to_end() -> None:
+    resource, resource_body = _load("resource.json")
+    broken, broken_body = _load("resource.invalid.json")
     config = ServerConfig(
         host=DEFAULT_HOST,
         port=0,
         resources=(
-            Resource(path=LISTING_PATH, document=listing, body=listing_body),
+            Resource(path=RESOURCE_PATH, document=resource, body=resource_body),
             Resource(
                 path=BROKEN_PATH,
                 document=broken,
@@ -99,16 +102,17 @@ def test_cottonwood_bench_condo_end_to_end() -> None:
         assert manifest["agent_id"] is None
         assert len(manifest["resources"]) == 1
         entry = manifest["resources"][0]
-        assert entry["uri"] == origin + LISTING_PATH
-        assert entry["type"] == "product"
-        assert entry["title"] == listing["title"]
+        assert entry["uri"] == origin + RESOURCE_PATH
+        assert entry["type"] == "article"
+        assert entry["title"] == resource["title"]
         assert "synthetic fixture" in entry["title"]
 
         # 2. Content negotiation: vendor type and application/json.
         vendor_accept = f"{RESOURCE_MEDIA_TYPE}; version={RESOURCE_VERSION}"
         fetched = client.fetch_resource(entry["uri"])
         assert fetched.content_type == RESOURCE_CONTENT_TYPE
-        assert fetched.document == listing
+        assert fetched.document == resource
+        assert fetched.document["provenance"]["fetched_at"] == FETCHED_AT
         vendor_status, vendor_headers, vendor_body = _get(entry["uri"], vendor_accept)
         json_status, json_headers, json_body = _get(entry["uri"], JSON_MEDIA_TYPE)
         assert vendor_status == 200
@@ -116,13 +120,13 @@ def test_cottonwood_bench_condo_end_to_end() -> None:
         assert vendor_headers["content-type"] == RESOURCE_CONTENT_TYPE
         assert json_headers["content-type"] == JSON_CONTENT_TYPE
         assert "accept" in vendor_headers["vary"].lower()
-        assert vendor_body == json_body == listing_body
+        assert vendor_body == json_body == resource_body
 
-        # 3. The language validator accepts the listing and rejects the broken one.
+        # 3. The language validator accepts the resource and rejects the broken one.
         module = validator_module()
         schema, vocabulary = loaded_language()
-        assert module.validate_document(listing, schema, vocabulary) == []
-        assert validation_errors(listing) == []
+        assert module.validate_document(resource, schema, vocabulary) == []
+        assert validation_errors(resource) == []
         invalid_lines = module.validate_document(broken, schema, vocabulary)
         assert invalid_lines
         assert any("risk" in line for line in invalid_lines)
@@ -141,86 +145,101 @@ def test_cottonwood_bench_condo_end_to_end() -> None:
         except ProtocolError as exc:
             assert exc.code == "schema_invalid"
         else:
-            raise AssertionError("broken listing must be rejected")
+            raise AssertionError("broken resource must be rejected")
 
         # 4. Library render: screen HTML and headless JSON.
         screen = render(fetched.document, RenderOptions(medium="screen"))
         headless = render(fetched.document, RenderOptions(medium="headless"))
         assert screen.medium == "screen"
-        assert screen.component == "product-card"
+        assert screen.component == "article-card"
         assert screen.fallback is False
         assert screen.body.lstrip().startswith("<!DOCTYPE html>")
         assert "<script" not in screen.body.lower()
-        assert listing["title"] in screen.body
-        assert "214 USD" in screen.body
-        assert "two-bedroom condo in St. George, Utah" in screen.body
-        assert "https://example.com/fixtures/cottonwood-bench/living-room.png" in screen.body
+        assert resource["title"] in screen.body
+        assert "generic resource" in screen.body
+        assert "https://example.com/fixtures/integration/mark.png" in screen.body
         assert ACTION in screen.body
+        assert FETCHED_AT in screen.body
         assert headless.medium == "headless"
-        assert headless.component == "product-card"
+        assert headless.component == "article-card"
         assert headless.fallback is False
         assert headless.value is not None
-        assert headless.value["title"] == listing["title"]
+        assert headless.value["title"] == resource["title"]
         content = headless.value["content"]
-        assert content["bedrooms"] == 2
-        assert content["bathrooms"] == 2
-        assert content["price"] == {"amount": 214, "currency": "USD"}
-        assert content["price_period"] == "night"
-        assert "shared pool" in content["amenities"]
-        assert content["availability"][0]["start"] == "2027-03-02"
-        assert "No smoking" in content["house_rules"]
-        assert content["images"][0]["src"].startswith("https://example.com/")
+        assert content["summary"].startswith("A domain-neutral resource")
+        assert "generic resource" in content["body"]
+        assert content["author"] == "example-publisher"
+        assert content["published_at"] == FETCHED_AT
+        assert content["tags"] == ["fixture", "integration"]
         assert headless.value["actions"][0]["name"] == ACTION
         assert headless.value["actions"][0]["risk"] == "high"
-        assert json.loads(headless.body)["id"] == listing["id"]
+        assert headless.value["actions"][0]["preconditions"] == PRECONDITIONS
+        assert headless.value["actions"][0]["effects"] == EFFECTS
+        assert json.loads(headless.body)["id"] == resource["id"]
 
-        # 5. Agent runtime against a stub host handler.
+        # 5. Agent runtime against a stub perform handler.
         calls: list[tuple] = []
         consent_risks: list[str] = []
+        consent_grants = iter((False, True))
 
         def perform(action, args, context):
             calls.append((action["name"], args, context["resource_type"]))
-            return {"request_id": "req-fixture-4401", "status": "requested"}
+            return {"result_id": "result-fixture-4401", "status": "updated"}
 
         def consent(action, args, context):
             consent_risks.append(action["risk"])
-            return True
+            return next(consent_grants)
 
-        ready = {"user": {"is_authenticated": True}, "stay": {"dates_available": True}}
-        blocked = {"user": {"is_authenticated": True}, "stay": {"dates_available": False}}
+        ready = {
+            "user": {"is_authenticated": True},
+            "resource": {"is_published": True},
+        }
+        blocked = {
+            "user": {"is_authenticated": True},
+            "resource": {"is_published": False},
+        }
 
         refused = client.invoke(
             fetched.document,
             ACTION,
-            STAY,
+            NOTE,
             SessionOptions(state=blocked, consent=consent, perform=perform),
         )
         assert refused.discovered[0]["name"] == ACTION
         assert refused.discovered[0]["risk"] == "high"
-        assert refused.discovered[0]["preconditions"] == [
-            "user.is_authenticated",
-            "stay.dates_available",
-        ]
+        assert refused.discovered[0]["preconditions"] == PRECONDITIONS
+        assert refused.discovered[0]["effects"] == EFFECTS
         assert refused.result.ok is False
         assert refused.result.code == "precondition_failed"
-        assert refused.result.details == ("stay.dates_available",)
+        assert refused.result.details == ("resource.is_published",)
         assert calls == []
         assert consent_risks == []
+
+        denied = client.invoke(
+            fetched.document,
+            ACTION,
+            NOTE,
+            SessionOptions(state=ready, consent=consent, perform=perform),
+        )
+        assert denied.result.ok is False
+        assert denied.result.code == "consent_denied"
+        assert calls == []
+        assert consent_risks == ["high"]
 
         accepted = client.invoke(
             fetched.document,
             ACTION,
-            STAY,
+            NOTE,
             SessionOptions(state=ready, consent=consent, perform=perform),
         )
         assert accepted.result.ok is True
         assert accepted.result.code == "ok"
         assert accepted.result.output == {
-            "request_id": "req-fixture-4401",
-            "status": "requested",
+            "result_id": "result-fixture-4401",
+            "status": "updated",
         }
-        assert calls == [(ACTION, STAY, "product")]
-        assert consent_risks == ["high"]
+        assert calls == [(ACTION, NOTE, "article")]
+        assert consent_risks == ["high", "high"]
     finally:
         server.shutdown()
         thread.join(timeout=2)
