@@ -13,7 +13,7 @@
   "actions": [
     {
       "name": "update_resource",
-      "description": "Record a note on this resource. This fixture does not write to another system.",
+      "description": "Update this resource with a note. This fixture does not write to another system.",
       "input_schema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
