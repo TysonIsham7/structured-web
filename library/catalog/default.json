@@ -12,13 +12,6 @@
       "signature": null
     },
     {
-      "name": "product-card",
-      "version": "1.0.0",
-      "types": ["product"],
-      "capabilities": ["text", "media", "links"],
-      "signature": null
-    },
-    {
       "name": "form-card",
       "version": "1.0.0",
       "types": ["form"],

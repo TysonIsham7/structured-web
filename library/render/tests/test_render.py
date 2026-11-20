@@ -50,7 +50,7 @@ def test_reuses_language_validator() -> None:
     )
 
 
-def test_default_catalog_covers_six_types_and_generic() -> None:
+def test_default_catalog_covers_five_types_and_generic() -> None:
     catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
     assert catalog["signature"] is None
     types: set[str] = set()
@@ -61,7 +61,6 @@ def test_default_catalog_covers_six_types_and_generic() -> None:
         assert entry["signature"] is None
     assert names == {
         "article-card",
-        "product-card",
         "form-card",
         "data-table",
         "service-card",
@@ -70,7 +69,6 @@ def test_default_catalog_covers_six_types_and_generic() -> None:
     }
     assert types == {
         "article",
-        "product",
         "form",
         "dataset",
         "service",
@@ -81,7 +79,7 @@ def test_default_catalog_covers_six_types_and_generic() -> None:
 
 EXAMPLE_RENDERINGS = [
     ("article.json", "canonical representation", "article-card"),
-    ("product.json", "24 USD", "product-card"),
+    ("update.json", "high-risk action", "article-card"),
     ("form.json", "Email", "form-card"),
     ("dataset.json", "Alpha", "data-table"),
     ("service.json", "https://example.com/api/weather", "service-card"),
@@ -217,11 +215,11 @@ def test_voice_is_not_implemented() -> None:
 
 
 def test_headless_returns_json() -> None:
-    document = load_example("product.json")
+    document = load_example("update.json")
     output = render(document, RenderOptions(medium="headless"))
     assert output.medium == "headless"
     assert output.value is not None
-    assert output.value["component"] == "product-card"
+    assert output.value["component"] == "article-card"
     assert output.value["title"] == document["title"]
     assert output.value["actions"][0]["name"] == "update_resource"
     parsed = json.loads(output.body)

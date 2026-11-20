@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "name": "structured-web-core",
-  "description": "Base vocabulary for the Structured Web resource description language. Defines the six core resource types and their content schemas, plus the standard predicate vocabulary used in action preconditions and effects.",
+  "description": "Base vocabulary for the Structured Web resource description language. Defines the five core resource types and their content schemas, plus the standard predicate vocabulary used in action preconditions and effects.",
   "types": {
     "article": {
       "description": "A piece of written content — blog post, news, essay, documentation page.",
@@ -27,39 +27,6 @@
           "tags": {
             "type": "array",
             "items": { "type": "string" }
-          }
-        },
-        "additionalProperties": true
-      }
-    },
-    "product": {
-      "description": "A sellable or referenceable item — physical good, digital good, or service offering.",
-      "content_schema": {
-        "type": "object",
-        "required": ["name", "price"],
-        "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "price": {
-            "type": "object",
-            "required": ["amount", "currency"],
-            "properties": {
-              "amount": { "type": "number" },
-              "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
-            }
-          },
-          "sku": { "type": "string" },
-          "in_stock": { "type": "boolean" },
-          "images": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["src", "alt"],
-              "properties": {
-                "src": { "type": "string", "format": "uri" },
-                "alt": { "type": "string" }
-              }
-            }
           }
         },
         "additionalProperties": true

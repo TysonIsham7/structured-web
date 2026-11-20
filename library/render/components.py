@@ -79,59 +79,6 @@ def render_article(document: Mapping[str, object]) -> str:
     return "".join(parts)
 
 
-def _amount(value: object) -> str:
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        return esc(value)
-    if isinstance(value, float) and value.is_integer():
-        return str(int(value))
-    return str(value)
-
-
-def render_product(document: Mapping[str, object]) -> str:
-    content = _content(document)
-    parts: list[str] = []
-    description = content.get("description")
-    if isinstance(description, str) and description:
-        parts.append(f'<p class="sw-summary">{esc(description)}</p>')
-    price = content.get("price")
-    if isinstance(price, dict):
-        parts.append(
-            '<p class="sw-price">'
-            f'{_amount(price.get("amount"))} {esc(price.get("currency"))}'
-            "</p>"
-        )
-    if isinstance(content.get("sku"), str):
-        parts.append(f'<p class="sw-sku">SKU {esc(content["sku"])}</p>')
-    if content.get("in_stock") is True:
-        parts.append('<p class="sw-stock">In stock</p>')
-    elif content.get("in_stock") is False:
-        parts.append('<p class="sw-stock">Out of stock</p>')
-    parts.append(_images(content.get("images")))
-    rendered = "".join(part for part in parts if part)
-    if not rendered:
-        return render_generic(document)
-    return rendered
-
-
-def _images(images: object) -> str:
-    if not isinstance(images, list):
-        return ""
-    figures: list[str] = []
-    for image in images:
-        if not isinstance(image, dict):
-            continue
-        src = safe_url(image.get("src"))
-        if src is None:
-            continue
-        alt = image.get("alt") if isinstance(image.get("alt"), str) else ""
-        figures.append(
-            "<figure>"
-            f'<img src="{esc(src, attr=True)}" alt="{esc(alt, attr=True)}">'
-            "</figure>"
-        )
-    return "".join(figures)
-
-
 def render_form(document: Mapping[str, object]) -> str:
     content = _content(document)
     fields = content.get("fields")
@@ -318,7 +265,6 @@ def render_error(document: Mapping[str, object]) -> str:
 
 BUILTIN_RENDERERS: dict[str, Renderer] = {
     "article-card": render_article,
-    "product-card": render_product,
     "form-card": render_form,
     "data-table": render_dataset,
     "service-card": render_service,

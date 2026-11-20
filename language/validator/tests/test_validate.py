@@ -61,8 +61,8 @@ def test_examples_are_valid(tmp_path: Path) -> None:
         "dataset.json",
         "error.json",
         "form.json",
-        "product.json",
         "service.json",
+        "update.json",
     ]
     # Run from a directory that is not the repo root. Schema and vocabulary
     # paths are resolved from the validator file, not from the cwd.
@@ -71,14 +71,17 @@ def test_examples_are_valid(tmp_path: Path) -> None:
         assert_valid(result)
 
 
-def test_examples_cover_the_three_milestone_types() -> None:
-    documents = [load_example(name) for name in ("article.json", "product.json", "form.json")]
-    assert {document["type"] for document in documents} == {"article", "form", "product"}
+def test_examples_cover_the_milestone_documents() -> None:
+    documents = [load_example(name) for name in ("article.json", "update.json", "form.json")]
+    assert {document["type"] for document in documents} == {"article", "form"}
+    high_risk = load_example("update.json")
+    assert high_risk["type"] == "article"
+    assert high_risk["actions"][0]["name"] == "update_resource"
 
 
-def test_product_high_risk_action() -> None:
-    product = load_example("product.json")
-    action = next(item for item in product["actions"] if item["name"] == "update_resource")
+def test_article_high_risk_action() -> None:
+    document = load_example("update.json")
+    action = next(item for item in document["actions"] if item["name"] == "update_resource")
     assert action["risk"] == "high"
     assert action["idempotent"] is False
     assert action["preconditions"] == [
@@ -86,7 +89,7 @@ def test_product_high_risk_action() -> None:
         "resource.is_published",
     ]
     assert action["effects"] == ["resource.updated"]
-    result = run_cli(str(EXAMPLES / "product.json"))
+    result = run_cli(str(EXAMPLES / "update.json"))
     assert_valid(result)
 
 
@@ -121,7 +124,7 @@ def test_missing_required_field(tmp_path: Path) -> None:
 
 
 def test_action_missing_required_field(tmp_path: Path) -> None:
-    document = load_example("product.json")
+    document = load_example("update.json")
     del document["actions"][0]["idempotent"]
     assert_invalid(
         run_cli(str(write_doc(tmp_path, document))),
@@ -130,7 +133,7 @@ def test_action_missing_required_field(tmp_path: Path) -> None:
 
 
 def test_risk_enum_rejects_bad_value(tmp_path: Path) -> None:
-    document = load_example("product.json")
+    document = load_example("update.json")
     document["actions"][0]["risk"] = "severe"
     result = run_cli(str(write_doc(tmp_path, document)))
     assert_invalid(result, "$.actions[0].risk")
@@ -141,15 +144,6 @@ def test_content_missing_required_body(tmp_path: Path) -> None:
     document = load_example("article.json")
     del document["content"]["body"]
     assert_invalid(run_cli(str(write_doc(tmp_path, document))), "$.content.body")
-
-
-def test_content_rejects_bad_currency(tmp_path: Path) -> None:
-    document = load_example("product.json")
-    document["content"]["price"]["currency"] = "US"
-    assert_invalid(
-        run_cli(str(write_doc(tmp_path, document))),
-        "$.content.price.currency",
-    )
 
 
 def test_duplicate_action_name(tmp_path: Path) -> None:
@@ -195,7 +189,7 @@ def test_invalid_json(tmp_path: Path) -> None:
 
 
 def test_reports_every_error_path(tmp_path: Path) -> None:
-    document = load_example("product.json")
+    document = load_example("update.json")
     del document["title"]
     document["actions"][0]["risk"] = "severe"
     assert_invalid(
@@ -227,14 +221,15 @@ def test_schema_is_draft_2020_12_and_forward_compatible() -> None:
     ]
 
 
-def test_core_vocabulary_is_the_existing_six_types() -> None:
+def test_core_vocabulary_is_the_five_types() -> None:
     vocabulary = json.loads(VOCAB_PATH.read_text(encoding="utf-8"))
     assert vocabulary["version"] == "0.1.0"
     assert set(vocabulary["types"]) == {
         "article",
-        "product",
         "form",
         "dataset",
         "service",
         "error",
     }
+    assert "product" not in vocabulary["types"]
+    assert "price" not in json.dumps(vocabulary["types"])

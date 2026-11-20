@@ -22,7 +22,7 @@ from protocol.server.resources import Resource, examples_dir
 from protocol.tests.conftest import http_request
 
 ARTICLE = "/articles/getting-started"
-PRODUCT = "/resources/example-product"
+RESOURCE = "/resources/example-update"
 FORM = "/forms/contact"
 BEARER = "test-bearer"
 
@@ -44,11 +44,16 @@ def test_manifest_lists_the_three_examples(base_url: str) -> None:
     assert manifest["version"] == "0.1.0"
     assert manifest["site"] == base_url
     assert manifest["agent_id"] is None
-    found = {item["type"]: item for item in manifest["resources"]}
-    assert set(found) == {"article", "product", "form"}
-    assert found["article"]["uri"] == base_url + ARTICLE
-    assert found["product"]["title"] == "Example product"
-    assert found["form"]["uri"] == base_url + FORM
+    found = {item["uri"]: item for item in manifest["resources"]}
+    assert set(found) == {
+        base_url + ARTICLE,
+        base_url + RESOURCE,
+        base_url + FORM,
+    }
+    assert found[base_url + ARTICLE]["type"] == "article"
+    assert found[base_url + RESOURCE]["type"] == "article"
+    assert found[base_url + RESOURCE]["title"] == "Example resource"
+    assert found[base_url + FORM]["type"] == "form"
     for name in ("x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset"):
         assert int(response.headers[name]) >= 0
 
@@ -70,7 +75,7 @@ def test_vendor_and_json_return_the_same_bytes(base_url: str) -> None:
 
 
 def test_html_is_the_default_representation(base_url: str) -> None:
-    url = base_url + PRODUCT
+    url = base_url + RESOURCE
     absent = http_request(url)
     wildcard = http_request(url, accept="*/*")
     html = http_request(url, accept="text/html")
@@ -78,7 +83,7 @@ def test_html_is_the_default_representation(base_url: str) -> None:
         assert response.status == 200
         assert response.headers["content-type"] == HTML_CONTENT_TYPE
         page = response.body.decode("utf-8")
-        assert "Example product" in page
+        assert "Example resource" in page
         assert "<script" not in page.lower()
         assert page.lstrip().startswith("<!DOCTYPE html>")
 
@@ -86,7 +91,7 @@ def test_html_is_the_default_representation(base_url: str) -> None:
 def test_each_example_negotiates(base_url: str) -> None:
     expected = {
         ARTICLE: "article",
-        PRODUCT: "product",
+        RESOURCE: "article",
         FORM: "form",
     }
     for path, resource_type in expected.items():
@@ -159,15 +164,15 @@ def test_manifest_json_accept_uses_the_legacy_type(base_url: str) -> None:
 
 
 def test_unauthorized_and_forbidden(serve_configured) -> None:
-    origin = serve_configured(tokens=(BEARER,), protect=(PRODUCT,))
-    missing = http_request(origin + PRODUCT, accept=JSON_MEDIA_TYPE)
+    origin = serve_configured(tokens=(BEARER,), protect=(RESOURCE,))
+    missing = http_request(origin + RESOURCE, accept=JSON_MEDIA_TYPE)
     assert missing.status == 401
     assert missing.json()["error"]["code"] == "unauthorized"
     assert missing.headers["www-authenticate"] == "Bearer"
-    assert b"Example product" not in missing.body
+    assert b"Example resource" not in missing.body
 
     rejected = http_request(
-        origin + PRODUCT,
+        origin + RESOURCE,
         accept=JSON_MEDIA_TYPE,
         authorization="Bearer other-bearer",
     )
@@ -175,12 +180,12 @@ def test_unauthorized_and_forbidden(serve_configured) -> None:
     assert rejected.json()["error"]["code"] == "forbidden"
 
     accepted = http_request(
-        origin + PRODUCT,
+        origin + RESOURCE,
         accept=JSON_MEDIA_TYPE,
         authorization=f"Bearer {BEARER}",
     )
     assert accepted.status == 200
-    assert accepted.json()["type"] == "product"
+    assert accepted.json()["type"] == "article"
 
     public = http_request(origin + ARTICLE, accept=JSON_MEDIA_TYPE)
     assert public.status == 200
@@ -188,24 +193,24 @@ def test_unauthorized_and_forbidden(serve_configured) -> None:
 
 
 def test_client_sends_session_credentials(serve_configured) -> None:
-    origin = serve_configured(tokens=(BEARER,), protect=(PRODUCT,))
+    origin = serve_configured(tokens=(BEARER,), protect=(RESOURCE,))
     client = Client()
     with pytest.raises(ProtocolError) as missing:
-        client.fetch_resource(origin + PRODUCT)
+        client.fetch_resource(origin + RESOURCE)
     assert missing.value.code == "unauthorized"
 
     with pytest.raises(ProtocolError) as rejected:
         client.fetch_resource(
-            origin + PRODUCT,
+            origin + RESOURCE,
             SessionOptions(credentials="other-bearer"),
         )
     assert rejected.value.code == "forbidden"
 
     fetched = client.fetch_resource(
-        origin + PRODUCT,
+        origin + RESOURCE,
         SessionOptions(credentials=BEARER),
     )
-    assert fetched.document["type"] == "product"
+    assert fetched.document["type"] == "article"
     assert fetched.content_type == RESOURCE_CONTENT_TYPE
 
 

@@ -100,7 +100,7 @@ def test_cottonwood_bench_condo_end_to_end() -> None:
         assert len(manifest["resources"]) == 1
         entry = manifest["resources"][0]
         assert entry["uri"] == origin + LISTING_PATH
-        assert entry["type"] == "product"
+        assert entry["type"] == "article"
         assert entry["title"] == listing["title"]
         assert "synthetic fixture" in entry["title"]
 
@@ -147,17 +147,16 @@ def test_cottonwood_bench_condo_end_to_end() -> None:
         screen = render(fetched.document, RenderOptions(medium="screen"))
         headless = render(fetched.document, RenderOptions(medium="headless"))
         assert screen.medium == "screen"
-        assert screen.component == "product-card"
+        assert screen.component == "article-card"
         assert screen.fallback is False
         assert screen.body.lstrip().startswith("<!DOCTYPE html>")
         assert "<script" not in screen.body.lower()
         assert listing["title"] in screen.body
         assert "214 USD" in screen.body
         assert "two-bedroom condo in St. George, Utah" in screen.body
-        assert "https://example.com/fixtures/cottonwood-bench/living-room.png" in screen.body
         assert ACTION in screen.body
         assert headless.medium == "headless"
-        assert headless.component == "product-card"
+        assert headless.component == "article-card"
         assert headless.fallback is False
         assert headless.value is not None
         assert headless.value["title"] == listing["title"]
@@ -219,7 +218,7 @@ def test_cottonwood_bench_condo_end_to_end() -> None:
             "request_id": "req-fixture-4401",
             "status": "requested",
         }
-        assert calls == [(ACTION, STAY, "product")]
+        assert calls == [(ACTION, STAY, "article")]
         assert consent_risks == ["high"]
     finally:
         server.shutdown()

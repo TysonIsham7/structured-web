@@ -19,7 +19,6 @@ from protocol.server.resources import EXAMPLES, examples_dir
 
 COMPONENTS = {
     "article": "article-card",
-    "product": "product-card",
     "form": "form-card",
 }
 
@@ -28,30 +27,30 @@ def test_fetch_validate_render_and_invoke(base_url: str) -> None:
     client = Client()
     manifest = client.fetch_manifest(base_url)
     assert manifest["agent_id"] is None
-    by_type = {item["type"]: item for item in manifest["resources"]}
-    assert set(by_type) == {"article", "product", "form"}
+    assert len(manifest["resources"]) == 3
+    assert {item["type"] for item in manifest["resources"]} == {"article", "form"}
 
     module = validator_module()
     schema, vocabulary = loaded_language()
-    fetched = {}
-    for resource_type, entry in by_type.items():
+    fetched = []
+    for entry in manifest["resources"]:
         got = client.fetch_resource(entry["uri"])
         assert got.content_type == RESOURCE_CONTENT_TYPE
         assert got.rate_limit_limit is not None
         assert module.validate_document(got.document, schema, vocabulary) == []
-        assert got.document["type"] == resource_type
+        assert got.document["type"] == entry["type"]
         assert got.document["title"] == entry["title"]
         source_name = dict(EXAMPLES)[entry["uri"].removeprefix(base_url)]
         assert got.document == json.loads(
             (examples_dir() / source_name).read_text(encoding="utf-8")
         )
         rendered = render(got.document, RenderOptions(medium="screen"))
-        assert rendered.component == COMPONENTS[resource_type]
+        assert rendered.component == COMPONENTS[got.document["type"]]
         assert rendered.fallback is False
         assert got.document["title"] in rendered.body
         assert "<script" not in rendered.body.lower()
         assert rendered.body.lstrip().startswith("<!DOCTYPE html>")
-        fetched[resource_type] = got
+        fetched.append(got)
 
     calls = []
 
@@ -62,7 +61,11 @@ def test_fetch_validate_render_and_invoke(base_url: str) -> None:
     def consent(action, args, context):
         raise AssertionError("a low-risk action must not ask for consent")
 
-    article = fetched["article"].document
+    article = next(
+        item.document
+        for item in fetched
+        if any(action.get("name") == "bookmark" for action in item.document["actions"])
+    )
     outcome = client.invoke(
         article,
         "bookmark",

@@ -40,7 +40,7 @@ A resource document has these top-level fields:
 | --- | --- | --- | --- |
 | `version` | string (semver) | yes | Format version. Agents use this to select a compatible parser. |
 | `id` | string (URI) | yes | Durable, globally unique identifier for this resource. Stable across updates. |
-| `type` | string | yes | Resource type from a registered vocabulary (see `vocabularies/`). Examples: `article`, `product`, `form`, `dataset`, `service`, `error`. |
+| `type` | string | yes | Resource type from a registered vocabulary (see `vocabularies/`). Examples: `article`, `form`, `dataset`, `service`, `error`. |
 | `title` | string | yes | Human-readable title. Also usable by agents as a display label. |
 | `content` | object | yes | Typed content payload. Structure depends on `type` — each type defines its own content schema in the vocabulary. |
 | `actions` | array | yes | Declared actions this resource supports. See Action Schema below. May be empty. |
@@ -105,7 +105,7 @@ All fields optional. The rendering library uses these as hints; it is not bound 
 
 Resource `type` values and action precondition/effect predicates come from versioned vocabularies shipped alongside the format:
 
-- `vocabularies/core.json` — base types: `article`, `product`, `form`, `dataset`, `service`, `error`.
+- `vocabularies/core.json` — base types: `article`, `form`, `dataset`, `service`, `error`.
 - Each type maps to a content schema.
 - Vocabularies are themselves JSON documents with semver, so they can evolve independently of the format version.
 

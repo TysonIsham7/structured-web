@@ -1,21 +1,11 @@
 {
   "version": "0.1.0",
-  "id": "urn:example:resource:product:example",
-  "type": "product",
-  "title": "Example product",
+  "id": "urn:example:resource:article:update",
+  "type": "article",
+  "title": "Example resource",
   "content": {
-    "name": "Example product",
-    "description": "A reference product used to illustrate a high-risk action.",
-    "price": {
-      "amount": 24,
-      "currency": "USD"
-    },
-    "images": [
-      {
-        "src": "https://example.com/media/example-product.png",
-        "alt": "Reference image for the example product"
-      }
-    ]
+    "body": "A reference article used to illustrate a high-risk action. The action applies a declared update when the caller is authenticated and the resource is published.",
+    "summary": "High-risk update on a domain-neutral article."
   },
   "actions": [
     {
@@ -61,19 +51,19 @@
     }
   ],
   "provenance": {
-    "source": "https://example.com/resources/example-product",
+    "source": "https://example.com/resources/example-update",
     "fetched_at": "2026-11-19T00:00:00Z",
     "content_hash": "sha256:242a6fa010b92a5541497ef4d0fda90606150ac7aac2e9f4e5a9b3c3ef101e23",
     "signed_by": null
   },
   "render": {
-    "preferred_component": "product-card",
+    "preferred_component": "article-card",
     "layout_priority": 1,
     "media": [
       {
         "type": "image",
-        "src": "https://example.com/media/example-product.png",
-        "alt": "Reference image for the example product"
+        "src": "https://example.com/media/example-update.png",
+        "alt": "Reference mark for the example resource"
       }
     ]
   }

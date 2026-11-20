@@ -1,9 +1,10 @@
 {
   "version": "0.1.0",
   "id": "https://example.com/listings/cottonwood-bench-condo",
-  "type": "product",
+  "type": "article",
   "title": "Cottonwood Bench Condo - synthetic fixture",
   "content": {
+    "body": "Synthetic fixture data for a fictional two-bedroom condo in St. George, Utah. The nightly rate is 214 USD.",
     "fixture_notice": "Synthetic fixture data. Invented for the structured-web integration test. Not a real listing, host, address, phone, email, or reservation.",
     "name": "Cottonwood Bench Condo",
     "description": "Synthetic fixture data for a fictional two-bedroom condo in St. George, Utah. This is not a real listing and it does not name a real host. Two bedrooms and two bathrooms, sleeping 6. The nightly rate is 214 USD. Amenities include wifi, a full kitchen, a shared pool, covered parking, a washer and dryer, and air conditioning. This fixture marks 2027-03-02 through 2027-03-18 as open. House rules: quiet hours from 22:00 to 08:00, no smoking, no events, and at most 6 guests.",
@@ -118,7 +119,7 @@
     "signed_by": null
   },
   "render": {
-    "preferred_component": "product-card",
+    "preferred_component": "article-card",
     "layout_priority": 1,
     "media": [
       {
