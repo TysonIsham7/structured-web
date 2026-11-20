@@ -226,6 +226,54 @@ def test_headless_returns_json() -> None:
     assert parsed == output.value
 
 
+def test_headless_keeps_unknown_fields() -> None:
+    document = resource(
+        "article",
+        {
+            "extension_marker": "beta",
+            "body": "A reference article used to probe unknown fields.",
+            "extension_detail": {"extension_note": "kept"},
+            "extension_list": [{"id": "first"}, {"id": "second"}],
+        },
+        "Pass-through probe",
+    )
+    document["extension_marker"] = {"keep": "alpha", "n": 2}
+    document["provenance"]["extension_source_note"] = "kept"
+    document["actions"] = [
+        {
+            "extension_flag": True,
+            "name": "note",
+            "description": "Record a note.",
+            "input_schema": {"type": "object"},
+            "output_schema": {"type": "object"},
+            "risk": "low",
+            "idempotent": True,
+        }
+    ]
+    output = render(document, RenderOptions(medium="headless"))
+    assert output.value is not None
+    assert output.value["extension_marker"] == {"keep": "alpha", "n": 2}
+    assert output.value["content"] is document["content"]
+    assert list(output.value["content"]) == [
+        "extension_marker",
+        "body",
+        "extension_detail",
+        "extension_list",
+    ]
+    assert output.value["content"]["extension_detail"]["extension_note"] == "kept"
+    assert output.value["content"]["extension_list"][0]["id"] == "first"
+    assert output.value["provenance"]["extension_source_note"] == "kept"
+    assert output.value["actions"][0]["extension_flag"] is True
+    assert "input_schema" not in output.value["actions"][0]
+    parsed = json.loads(output.body)
+    assert parsed["content"] == document["content"]
+    assert parsed["extension_marker"] == document["extension_marker"]
+    screen = render(document)
+    assert "extension_marker" not in screen.body
+    assert "extension_note" not in screen.body
+    assert "extension_flag" not in screen.body
+
+
 def test_theme_hooks_are_sanitized() -> None:
     document = load_example("article.json")
     themed = render(

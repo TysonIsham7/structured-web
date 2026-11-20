@@ -94,18 +94,20 @@ class AgentSession:
         self._require_open()
         catalog: list[dict[str, Any]] = []
         for action in self._document["actions"]:
-            catalog.append(
-                {
-                    "name": action["name"],
-                    "description": action["description"],
-                    "input_schema": copy.deepcopy(action["input_schema"]),
-                    "output_schema": copy.deepcopy(action["output_schema"]),
-                    "preconditions": list(action.get("preconditions") or []),
-                    "effects": list(action.get("effects") or []),
-                    "risk": action["risk"],
-                    "idempotent": action["idempotent"],
-                }
-            )
+            entry = {
+                "name": action["name"],
+                "description": action["description"],
+                "input_schema": copy.deepcopy(action["input_schema"]),
+                "output_schema": copy.deepcopy(action["output_schema"]),
+                "preconditions": list(action.get("preconditions") or []),
+                "effects": list(action.get("effects") or []),
+                "risk": action["risk"],
+                "idempotent": action["idempotent"],
+            }
+            for key, value in action.items():
+                if key not in entry:
+                    entry[key] = copy.deepcopy(value)
+            catalog.append(entry)
         return catalog
 
     def invoke(self, name: str, args: object) -> Result:

@@ -163,33 +163,37 @@ def _headless_payload(
     component: str,
     fallback: bool,
 ) -> dict:
+    """Build the headless object without dropping document fields.
+
+    Action entries are a short catalog: the embedded schemas stay on the
+    document, and every other action field is copied through. `medium`,
+    `component`, and `fallback` are renderer metadata.
+    """
     actions = []
     raw_actions = document.get("actions")
     if isinstance(raw_actions, list):
         for action in raw_actions:
             if not isinstance(action, dict):
                 continue
-            actions.append(
-                {
-                    "name": action.get("name"),
-                    "description": action.get("description"),
-                    "risk": action.get("risk"),
-                    "idempotent": action.get("idempotent"),
-                    "preconditions": list(action.get("preconditions") or []),
-                    "effects": list(action.get("effects") or []),
-                }
-            )
-    return {
-        "medium": "headless",
-        "id": document.get("id"),
-        "type": document.get("type"),
-        "title": document.get("title"),
-        "component": component,
-        "fallback": fallback,
-        "content": document.get("content"),
-        "actions": actions,
-        "links": document.get("links"),
-    }
+            summary = {
+                "name": action.get("name"),
+                "description": action.get("description"),
+                "risk": action.get("risk"),
+                "idempotent": action.get("idempotent"),
+                "preconditions": list(action.get("preconditions") or []),
+                "effects": list(action.get("effects") or []),
+            }
+            for key, value in action.items():
+                if key not in summary and key not in {"input_schema", "output_schema"}:
+                    summary[key] = value
+            actions.append(summary)
+    payload: dict = {}
+    for key, value in document.items():
+        payload[key] = actions if key == "actions" else value
+    payload["medium"] = "headless"
+    payload["component"] = component
+    payload["fallback"] = fallback
+    return payload
 
 
 __all__ = [
