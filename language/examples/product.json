@@ -1,36 +1,34 @@
 {
   "version": "0.1.0",
-  "id": "urn:example:resource:product:widget-100",
+  "id": "urn:example:resource:product:example",
   "type": "product",
-  "title": "Example Widget",
+  "title": "Example product",
   "content": {
-    "name": "Example Widget",
-    "description": "A reference product used to illustrate a high-risk purchase action.",
+    "name": "Example product",
+    "description": "A reference product used to illustrate a high-risk action.",
     "price": {
       "amount": 24,
       "currency": "USD"
     },
-    "sku": "WIDGET-100",
-    "in_stock": true,
     "images": [
       {
-        "src": "https://example.com/media/widget-100.png",
-        "alt": "Example widget on a plain background"
+        "src": "https://example.com/media/example-product.png",
+        "alt": "Reference image for the example product"
       }
     ]
   },
   "actions": [
     {
-      "name": "purchase",
-      "description": "Complete a purchase for this product.",
+      "name": "update_resource",
+      "description": "Apply a declared update to this resource.",
       "input_schema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
-        "required": ["quantity"],
+        "required": ["note"],
         "properties": {
-          "quantity": {
-            "type": "integer",
-            "minimum": 1
+          "note": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "additionalProperties": false
@@ -38,9 +36,9 @@
       "output_schema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
-        "required": ["order_id", "status"],
+        "required": ["result_id", "status"],
         "properties": {
-          "order_id": {
+          "result_id": {
             "type": "string"
           },
           "status": {
@@ -49,8 +47,8 @@
         },
         "additionalProperties": false
       },
-      "preconditions": ["user.is_authenticated", "cart.non_empty"],
-      "effects": ["order.created", "inventory.decremented"],
+      "preconditions": ["user.is_authenticated", "resource.is_published"],
+      "effects": ["resource.updated"],
       "risk": "high",
       "idempotent": false
     }
@@ -63,7 +61,7 @@
     }
   ],
   "provenance": {
-    "source": "https://example.com/products/widget-100",
+    "source": "https://example.com/resources/example-product",
     "fetched_at": "2026-11-19T00:00:00Z",
     "content_hash": "sha256:242a6fa010b92a5541497ef4d0fda90606150ac7aac2e9f4e5a9b3c3ef101e23",
     "signed_by": null
@@ -74,8 +72,8 @@
     "media": [
       {
         "type": "image",
-        "src": "https://example.com/media/widget-100.png",
-        "alt": "Example widget on a plain background"
+        "src": "https://example.com/media/example-product.png",
+        "alt": "Reference image for the example product"
       }
     ]
   }

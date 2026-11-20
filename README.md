@@ -72,7 +72,7 @@ You would not throw away HTTP or browsers. You would:
 - Standardize an action catalog format and a discovery mechanism (a well-known path or link relation).
 - Evolve browser developer tools and agent runtimes to consume the structured form preferentially.
 - Treat existing HTML sites as legacy views that can be gradually annotated or wrapped with structured descriptions.
-- Encourage platforms and major sites to expose action catalogs first for the most valuable interactions (search, booking, purchase, form fill, data export).
+- Encourage platforms and major sites to expose action catalogs first for the most valuable interactions (search, retrieval, update, form fill, data export).
 
 The structured form only becomes canonical when the tooling and incentives make it cheaper than raw markup. That is the adoption problem, and it is the single biggest thing that decides whether this happens. The realistic path is a decade of legacy HTML wrapped with structured annotations, not a clean break.
 

@@ -22,7 +22,7 @@ from protocol.server.resources import Resource, examples_dir
 from protocol.tests.conftest import http_request
 
 ARTICLE = "/articles/getting-started"
-PRODUCT = "/products/widget-100"
+PRODUCT = "/resources/example-product"
 FORM = "/forms/contact"
 BEARER = "test-bearer"
 
@@ -47,7 +47,7 @@ def test_manifest_lists_the_three_examples(base_url: str) -> None:
     found = {item["type"]: item for item in manifest["resources"]}
     assert set(found) == {"article", "product", "form"}
     assert found["article"]["uri"] == base_url + ARTICLE
-    assert found["product"]["title"] == "Example Widget"
+    assert found["product"]["title"] == "Example product"
     assert found["form"]["uri"] == base_url + FORM
     for name in ("x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset"):
         assert int(response.headers[name]) >= 0
@@ -78,7 +78,7 @@ def test_html_is_the_default_representation(base_url: str) -> None:
         assert response.status == 200
         assert response.headers["content-type"] == HTML_CONTENT_TYPE
         page = response.body.decode("utf-8")
-        assert "Example Widget" in page
+        assert "Example product" in page
         assert "<script" not in page.lower()
         assert page.lstrip().startswith("<!DOCTYPE html>")
 
@@ -164,7 +164,7 @@ def test_unauthorized_and_forbidden(serve_configured) -> None:
     assert missing.status == 401
     assert missing.json()["error"]["code"] == "unauthorized"
     assert missing.headers["www-authenticate"] == "Bearer"
-    assert b"Example Widget" not in missing.body
+    assert b"Example product" not in missing.body
 
     rejected = http_request(
         origin + PRODUCT,

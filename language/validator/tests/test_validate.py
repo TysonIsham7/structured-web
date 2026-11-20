@@ -76,11 +76,16 @@ def test_examples_cover_the_three_milestone_types() -> None:
     assert {document["type"] for document in documents} == {"article", "form", "product"}
 
 
-def test_product_purchase_action_is_high_risk() -> None:
+def test_product_high_risk_action() -> None:
     product = load_example("product.json")
-    purchase = next(action for action in product["actions"] if action["name"] == "purchase")
-    assert purchase["risk"] == "high"
-    assert purchase["idempotent"] is False
+    action = next(item for item in product["actions"] if item["name"] == "update_resource")
+    assert action["risk"] == "high"
+    assert action["idempotent"] is False
+    assert action["preconditions"] == [
+        "user.is_authenticated",
+        "resource.is_published",
+    ]
+    assert action["effects"] == ["resource.updated"]
     result = run_cli(str(EXAMPLES / "product.json"))
     assert_valid(result)
 

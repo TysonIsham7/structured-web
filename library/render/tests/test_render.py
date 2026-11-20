@@ -81,9 +81,9 @@ def test_default_catalog_covers_six_types_and_generic() -> None:
 
 EXAMPLE_RENDERINGS = [
     ("article.json", "canonical representation", "article-card"),
-    ("product.json", "WIDGET-100", "product-card"),
+    ("product.json", "24 USD", "product-card"),
     ("form.json", "Email", "form-card"),
-    ("dataset.json", "Wireless Mouse", "data-table"),
+    ("dataset.json", "Alpha", "data-table"),
     ("service.json", "https://example.com/api/weather", "service-card"),
     ("error.json", "not_found", "error-card"),
 ]
@@ -223,7 +223,7 @@ def test_headless_returns_json() -> None:
     assert output.value is not None
     assert output.value["component"] == "product-card"
     assert output.value["title"] == document["title"]
-    assert output.value["actions"][0]["name"] == "purchase"
+    assert output.value["actions"][0]["name"] == "update_resource"
     parsed = json.loads(output.body)
     assert parsed == output.value
 

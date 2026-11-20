@@ -187,18 +187,14 @@
     "examples": [
       "user.is_authenticated",
       "user.has_role:admin",
-      "cart.non_empty",
       "resource.is_published",
-      "inventory.available",
       "session.not_expired"
     ],
     "syntax": "Predicates follow dotted noun.verb form. Optional colon-suffixed parameter. The noun refers to a state domain the host application exposes; the verb is a boolean check. This vocabulary defines the syntax and a starter set; hosts may register domain-specific predicates alongside these.",
     "starter_set": [
       "user.is_authenticated",
       "user.has_role:{role}",
-      "cart.non_empty",
       "resource.is_published",
-      "inventory.available",
       "session.not_expired",
       "quota.remaining"
     ]

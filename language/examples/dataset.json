@@ -1,19 +1,19 @@
 {
-  "id": "https://example.com/data/products",
+  "id": "https://example.com/data/records",
   "type": "dataset",
   "version": "0.1.0",
-  "title": "Product Catalog",
+  "title": "Record sample",
   "content": {
     "columns": [
-      { "name": "sku", "type": "string" },
-      { "name": "name", "type": "string" },
-      { "name": "price", "type": "number" },
-      { "name": "in_stock", "type": "boolean" }
+      { "name": "id", "type": "string" },
+      { "name": "label", "type": "string" },
+      { "name": "value", "type": "number" },
+      { "name": "active", "type": "boolean" }
     ],
     "rows": [
-      ["SKU-001", "Wireless Mouse", 29.99, true],
-      ["SKU-002", "USB-C Hub", 49.99, true],
-      ["SKU-003", "Laptop Stand", 89.99, false]
+      ["rec-001", "Alpha", 1, true],
+      ["rec-002", "Beta", 2, true],
+      ["rec-003", "Gamma", 3, false]
     ],
     "total_count": 3
   },
@@ -43,7 +43,7 @@
   ],
   "links": [],
   "provenance": {
-    "source": "https://example.com/data/products",
+    "source": "https://example.com/data/records",
     "fetched_at": "2026-11-18T12:00:00Z",
     "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },

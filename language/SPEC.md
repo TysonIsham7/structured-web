@@ -54,12 +54,12 @@ Each entry in `actions`:
 
 ```json
 {
-  "name": "purchase",
-  "description": "Complete a purchase for this product.",
+  "name": "update_resource",
+  "description": "Apply a declared update to this resource.",
   "input_schema": { },
   "output_schema": { },
-  "preconditions": ["user.is_authenticated", "cart.non_empty"],
-  "effects": ["order.created", "inventory.decremented"],
+  "preconditions": ["user.is_authenticated", "resource.is_published"],
+  "effects": ["resource.updated"],
   "risk": "high",
   "idempotent": false
 }
@@ -112,7 +112,7 @@ Resource `type` values and action precondition/effect predicates come from versi
 ## First Milestone (build this PR)
 
 1. **Formal JSON Schema** for the v0.1 document structure above, including the action schema, at `language/schema/resource.schema.json`.
-2. **Three example documents** exercising different types: an article, a product with a high-risk purchase action, and a form. At `language/examples/`.
+2. **Three example documents** exercising different types: an article, a high-risk action, and a form. At `language/examples/`.
 3. **A minimal validator CLI** (Python or TypeScript — pick one, justify in the PR) that takes a file path and prints `VALID` or `INVALID` with specific error paths. At `language/validator/`.
 4. **The core vocabulary file** at `vocabularies/core.json` defining the six base types, including `error`, with content schemas.
 5. **Tests** covering: valid document passes, missing required field fails, unknown field is ignored (forward-compat), action schema validates, risk enum rejects bad values.
