@@ -1,0 +1,78 @@
+{
+  "version": "0.1.0",
+  "id": "https://example.com/resources/example-resource",
+  "type": "article",
+  "title": "Example resource - synthetic fixture",
+  "content": {
+    "body": "Synthetic fixture data for the structured-web integration test. This document is a generic resource. It names no industry, place, or person. A high-risk action updates the resource when the caller is authenticated and the resource is published.",
+    "summary": "A domain-neutral resource used to prove discovery, validation, rendering, and a risk-gated action.",
+    "author": "example-publisher",
+    "published_at": "2026-11-19T00:00:00Z",
+    "tags": ["fixture", "integration"]
+  },
+  "actions": [
+    {
+      "name": "update_resource",
+      "description": "Record a note on this resource. This fixture does not write to another system.",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["note"],
+        "properties": {
+          "note": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["result_id", "status"],
+        "properties": {
+          "result_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "preconditions": ["user.is_authenticated", "resource.is_published"],
+      "effects": ["resource.updated"],
+      "risk": "high",
+      "idempotent": false
+    }
+  ],
+  "links": [
+    {
+      "rel": "terms",
+      "href": "https://example.com/fixtures/integration/terms",
+      "title": "Terms for this synthetic fixture"
+    },
+    {
+      "rel": "about",
+      "href": "https://example.com/fixtures/integration/about",
+      "title": "Why this fixture is synthetic"
+    }
+  ],
+  "provenance": {
+    "source": "https://example.com/resources/example-resource",
+    "fetched_at": "2026-11-19T00:00:00Z",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "signed_by": null
+  },
+  "render": {
+    "preferred_component": "article-card",
+    "layout_priority": 1,
+    "media": [
+      {
+        "type": "image",
+        "src": "https://example.com/fixtures/integration/mark.png",
+        "alt": "Synthetic fixture mark"
+      }
+    ]
+  }
+}
