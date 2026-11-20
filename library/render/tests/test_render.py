@@ -228,11 +228,11 @@ def test_headless_returns_json() -> None:
 
 def test_headless_keeps_unknown_fields() -> None:
     document = resource(
-        "product",
+        "article",
         {
             "extension_marker": "beta",
-            "name": "Probe item",
-            "price": {"extension_unit": "each", "amount": 3, "currency": "USD"},
+            "body": "A reference article used to probe unknown fields.",
+            "extension_detail": {"extension_note": "kept"},
             "extension_list": [{"id": "first"}, {"id": "second"}],
         },
         "Pass-through probe",
@@ -256,11 +256,11 @@ def test_headless_keeps_unknown_fields() -> None:
     assert output.value["content"] is document["content"]
     assert list(output.value["content"]) == [
         "extension_marker",
-        "name",
-        "price",
+        "body",
+        "extension_detail",
         "extension_list",
     ]
-    assert output.value["content"]["price"]["extension_unit"] == "each"
+    assert output.value["content"]["extension_detail"]["extension_note"] == "kept"
     assert output.value["content"]["extension_list"][0]["id"] == "first"
     assert output.value["provenance"]["extension_source_note"] == "kept"
     assert output.value["actions"][0]["extension_flag"] is True
@@ -270,7 +270,7 @@ def test_headless_keeps_unknown_fields() -> None:
     assert parsed["extension_marker"] == document["extension_marker"]
     screen = render(document)
     assert "extension_marker" not in screen.body
-    assert "extension_unit" not in screen.body
+    assert "extension_note" not in screen.body
     assert "extension_flag" not in screen.body
 
 

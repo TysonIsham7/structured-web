@@ -108,10 +108,9 @@ def test_unknown_fields_are_ignored(tmp_path: Path) -> None:
 
 def test_unknown_content_fields_are_kept(tmp_path: Path) -> None:
     """Extra content fields are valid, and validation does not rewrite them."""
-    document = load_example("product.json")
+    document = load_example("update.json")
     document["content"]["extension_marker"] = {"keep": "beta"}
-    document["content"]["price"]["extension_unit"] = "each"
-    document["content"]["images"][0]["extension_caption"] = "side"
+    document["content"]["extension_detail"] = {"extension_note": "kept"}
     before = copy.deepcopy(document)
     assert validate_document(document, load_schema(), load_vocabulary()) == []
     assert document == before

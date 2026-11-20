@@ -18,35 +18,31 @@ PROBE_PATH = "/probe"
 def _probe() -> dict:
     return {
         "version": "0.1.0",
-        "id": "urn:example:resource:product:pass-through",
-        "type": "product",
+        "id": "urn:example:resource:article:pass-through",
+        "type": "article",
         "title": "Pass-through probe",
         "extension_marker": {"keep": "alpha", "n": 2},
         "content": {
             "extension_marker": "beta",
-            "name": "Probe item",
-            "price": {"extension_unit": "each", "amount": 3, "currency": "USD"},
+            "body": "A reference article used to probe unknown fields.",
+            "extension_detail": {"extension_note": "kept"},
             "extension_list": [
-                {"id": "first", "note": "a"},
-                {"id": "second", "note": "z"},
-            ],
-            "images": [
-                {
-                    "extension_caption": "side",
-                    "src": "https://example.com/media/probe.png",
-                    "alt": "Probe image",
-                }
+                {"id": "first", "label": "a"},
+                {"id": "second", "label": "z"},
             ],
         },
         "actions": [
             {
                 "extension_flag": True,
-                "name": "note",
-                "description": "Record a note.",
+                "name": "update_resource",
+                "description": "Apply a declared update to this resource.",
                 "input_schema": {"type": "object"},
                 "output_schema": {"type": "object"},
-                "preconditions": ["user.is_authenticated"],
-                "effects": ["note.recorded"],
+                "preconditions": [
+                    "user.is_authenticated",
+                    "resource.is_published",
+                ],
+                "effects": ["resource.updated"],
                 "risk": "low",
                 "idempotent": True,
             }
@@ -55,19 +51,27 @@ def _probe() -> dict:
             {
                 "extension_hint": "related-extra",
                 "rel": "about",
-                "href": "urn:example:resource:product:about",
+                "href": "urn:example:resource:article:about",
             }
         ],
         "provenance": {
             "extension_source_note": "kept",
-            "source": "urn:example:resource:product:pass-through",
+            "source": "https://example.com/resources/pass-through",
             "fetched_at": "2026-11-19T00:00:00Z",
             "content_hash": "sha256:" + ("ab" * 32),
             "signed_by": None,
         },
         "render": {
             "extension_hint": "kept",
-            "preferred_component": "product-card",
+            "preferred_component": "article-card",
+            "media": [
+                {
+                    "extension_caption": "side",
+                    "type": "image",
+                    "src": "https://example.com/media/probe.png",
+                    "alt": "Reference mark for the probe",
+                }
+            ],
         },
     }
 
@@ -104,8 +108,8 @@ def test_unknown_fields_round_trip(serve_configured) -> None:
     assert headless.value is not None
     assert headless.value["content"] is fetched.document["content"]
     assert headless.value["content"]["extension_list"][0]["id"] == "first"
-    assert headless.value["content"]["price"]["extension_unit"] == "each"
-    assert headless.value["content"]["images"][0]["extension_caption"] == "side"
+    assert headless.value["content"]["extension_detail"]["extension_note"] == "kept"
+    assert headless.value["render"]["media"][0]["extension_caption"] == "side"
     assert headless.value["extension_marker"] == {"keep": "alpha", "n": 2}
     assert headless.value["actions"][0]["extension_flag"] is True
     assert headless.value["provenance"]["extension_source_note"] == "kept"
