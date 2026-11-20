@@ -11,7 +11,7 @@ from library.documents import loaded_language
 
 EXAMPLES: tuple[tuple[str, str], ...] = (
     ("/articles/getting-started", "article.json"),
-    ("/products/widget-100", "product.json"),
+    ("/resources/example-update", "update.json"),
     ("/forms/contact", "form.json"),
 )
 
