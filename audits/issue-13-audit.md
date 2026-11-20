@@ -22,7 +22,7 @@ Library: `library/SPEC.md`, `library/documents.py`, `library/catalog/default.jso
 
 Protocol: `protocol/SPEC.md`, `protocol/DECISIONS.md`, `protocol/MEDIA_TYPE_PROPOSAL.md`, `protocol/server/app.py`, `protocol/server/resources.py`, `protocol/server/negotiate.py`, `protocol/client/client.py`, and the protocol tests.
 
-Fixture: `examples/st-george-condo/` (allowed to be domain-flavored). Also `README.md`, `CONTRIBUTING.md`, and `.github/workflows/ci.yml`.
+Fixture: `examples/st-george-condo/`. Domain-specific examples belong outside the core spec, vocabulary and reference fixtures. PR #19 replaces this fixture with a domain-neutral one (`examples/integration-fixture/`). Issue #17 removes retail terms from the core word list. Also `README.md`, `CONTRIBUTING.md`, and `.github/workflows/ci.yml`.
 
 Searched the core schema, core vocabulary, and the three layer specs for lodging, medical, legal, retail, cart, inventory, patient, diagnosis, and bedroom wording. Lodging, medical, legal, patient, and diagnosis do not appear there. Bedroom and house-rule wording appears only under `examples/st-george-condo/`.
 
@@ -105,8 +105,8 @@ The agent runtime does not keep a predicate allow-list. `library/agent/precondit
 Not counted, on purpose:
 
 - `sku` and `in_stock` are optional product fields, not required, and not a separate vertical type. The product card prints them when present. A document may omit them.
-- `language/examples/product.json` and `language/examples/dataset.json` use purchase, cart, inventory, and sku data. Example documents may be domain-flavored. The core schema does not import them.
-- `examples/st-george-condo/` is the allowed domain fixture.
+- `language/examples/product.json` and `language/examples/dataset.json` use purchase, cart, inventory, and sku data. Domain-specific examples belong outside the core spec, vocabulary and reference fixtures. The core schema does not import them. Issue #17 removes retail terms from the core word list.
+- `examples/st-george-condo/` is a domain-specific fixture. Domain-specific examples belong outside the core spec, vocabulary and reference fixtures. PR #19 replaces it with a domain-neutral fixture (`examples/integration-fixture/`).
 - `README.md` compares the architecture to existing structured-data and API-description practice and names booking and purchase as interactions worth exposing. It does not define types or predicates.
 
 ### Proposed spec-change issue
@@ -131,7 +131,7 @@ Keep the dotted predicate syntax. Keep these starter predicates: `user.is_authen
 
 In the language spec sample, keep a high-risk action so the milestone story still has one, and replace the retail predicate and effect strings with cross-domain ones (`user.is_authenticated`, `resource.is_published`, and an effect such as `resource.updated`).
 
-Leave `language/examples/product.json` as a purchase example. Example documents may carry domain-flavored predicate strings. The runtime already evaluates any predicate against the host snapshot and does not treat the starter set as an allow-list.
+Domain-specific examples belong outside the core spec, vocabulary and reference fixtures, so `language/examples/product.json` does not stay in that set as a purchase sample. Issue #17 removes retail terms from the core word list. The runtime already evaluates any predicate against the host snapshot and does not treat the starter set as an allow-list.
 
 **Rationale**
 
