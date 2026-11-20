@@ -81,7 +81,7 @@ jobs:
           trap cleanup EXIT
           python -c "from protocol.server.app import wait_until_ready; wait_until_ready()"
           python -m pytest protocol/tests/ -v
-          python -m pytest examples/st-george-condo/test_integration.py -v
+          python -m pytest examples/integration-fixture/test_integration.py -v
 
   gitleaks:
     runs-on: ubuntu-latest
