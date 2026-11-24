@@ -59,6 +59,28 @@ def test_discover_returns_declared_actions() -> None:
     assert session.discover()[0]["name"] == ACTION
 
 
+def test_discover_keeps_unknown_action_fields() -> None:
+    document = load_example("update.json")
+    document["actions"][0]["extension_flag"] = {"keep": True}
+    seen = {}
+
+    def perform(action, args, context):
+        seen["flag"] = copy.deepcopy(action["extension_flag"])
+        return action_output(action, args, context)
+
+    session = create_session(
+        document,
+        SessionOptions(state=ready_state(), consent=allow, perform=perform),
+    )
+    catalog = session.discover()
+    assert catalog[0]["extension_flag"] == {"keep": True}
+    catalog[0]["extension_flag"]["keep"] = False
+    assert session.discover()[0]["extension_flag"] == {"keep": True}
+    result = session.invoke(ACTION, VALID_ARGS)
+    assert result.ok is True
+    assert seen["flag"] == {"keep": True}
+
+
 def test_invoke_with_valid_args_succeeds() -> None:
     seen = {}
 

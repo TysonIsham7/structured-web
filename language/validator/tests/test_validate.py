@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from language.validator.validate import load_schema, load_vocabulary, validate_document
+
 REPO = Path(__file__).resolve().parents[3]
 EXAMPLES = REPO / "language" / "examples"
 VALIDATOR = REPO / "language" / "validator" / "validate.py"
@@ -102,6 +104,20 @@ def test_unknown_fields_are_ignored(tmp_path: Path) -> None:
     assert_valid(result)
     assert "future_extension" not in result.stdout
     assert "future_flag" not in result.stdout
+
+
+def test_unknown_content_fields_are_kept(tmp_path: Path) -> None:
+    """Extra content fields are valid, and validation does not rewrite them."""
+    document = load_example("update.json")
+    document["content"]["extension_marker"] = {"keep": "beta"}
+    document["content"]["extension_detail"] = {"extension_note": "kept"}
+    before = copy.deepcopy(document)
+    assert validate_document(document, load_schema(), load_vocabulary()) == []
+    assert document == before
+    path = write_doc(tmp_path, document)
+    on_disk = path.read_text(encoding="utf-8")
+    assert_valid(run_cli(str(path)))
+    assert path.read_text(encoding="utf-8") == on_disk
 
 
 def test_empty_actions_and_links_are_valid(tmp_path: Path) -> None:
